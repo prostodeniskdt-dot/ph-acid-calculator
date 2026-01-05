@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Калькулятор pH кислот</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Калькулятор pH для кислот</h1>
+
+    <section class="card">
+      <h2>pH раствора</h2>
+
+      <label class="field">
+        <span>Кислота</span>
+        <select id="acidSelect"></select>
+      </label>
+
+      <label class="field">
+        <span>Концентрация, % (w/w)</span>
+        <input id="percentInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="например 1.5" />
+      </label>
+
+      <div class="result">
+        <div class="result-label">pH</div>
+        <div id="phOutput" class="result-value">0.0</div>
+      </div>
+
+      <p class="hint">
+        Модель повторяет Excel: [H+] ≈ √(Ka·C), C считается через плотность, pH округляется вниз до 0.1.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Разбавление водой</h2>
+
+      <div class="grid">
+        <label class="field">
+          <span>Масса раствора, г</span>
+          <input id="massInput" type="number" inputmode="decimal" min="0" step="0.1" placeholder="например 500" />
+        </label>
+
+        <label class="field">
+          <span>Исходная концентрация, %</span>
+          <input id="c0Input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="например 5" />
+        </label>
+
+        <label class="field">
+          <span>Целевая концентрация, %</span>
+          <input id="ctInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="например 2" />
+        </label>
+      </div>
+
+      <div class="result">
+        <div class="result-label">Добавить воды, г</div>
+        <div id="waterOutput" class="result-value">0</div>
+      </div>
+
+      <p class="hint">
+        Формула как в Excel: вода = (c0·m/ct) − m. Если ct ≥ c0, результат ограничен снизу нулём.
+      </p>
+    </section>
+
+    <footer class="footer">
+      <small>v1.0 — статическая страница, подходит для GitHub Pages.</small>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
