@@ -2,34 +2,65 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Калькулятор pH кислот</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0c10" />
+  <title>Калькулятор pH для кислот</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <main class="container">
-    <h1>Калькулятор pH для кислот</h1>
+    <header class="header">
+      <h1>Калькулятор pH для кислот</h1>
+      <p class="subtitle">Быстрый расчёт pH и разбавления для барных заготовок.</p>
+    </header>
+
+    <section class="card">
+      <details class="details" open>
+        <summary>Как пользоваться</summary>
+        <div class="details-body">
+          <ol>
+            <li><b>pH раствора:</b> выберите кислоту → введите концентрацию в <b>% (w/w)</b> → получите pH (округление вниз до 0.1).</li>
+            <li><b>Разбавление водой:</b> введите <b>объём раствора (мл)</b>, исходную % и целевую % → получите сколько воды добавить.</li>
+          </ol>
+          <ul class="muted-list">
+            <li>Если целевая концентрация <b>выше</b> исходной — водой это сделать нельзя (покажем подсказку).</li>
+            <li>Для воды принимаем 1 г ≈ 1 мл, поэтому “г воды” практически равно “мл воды”.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
 
     <section class="card">
       <h2>pH раствора</h2>
 
       <label class="field">
         <span>Кислота</span>
-        <select id="acidSelect"></select>
+        <select id="acidSelect" aria-label="Выбор кислоты"></select>
       </label>
 
       <label class="field">
         <span>Концентрация, % (w/w)</span>
-        <input id="percentInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="например 1.5" />
+        <input
+          id="percentInput"
+          type="text"
+          inputmode="decimal"
+          placeholder="например 1,5"
+          aria-label="Концентрация кислоты в процентах"
+        />
+        <small class="hint">Можно вводить через точку или запятую.</small>
       </label>
 
       <div class="result">
-        <div class="result-label">pH</div>
+        <div class="result-left">
+          <div class="result-label">pH</div>
+          <div id="phNote" class="note"></div>
+        </div>
         <div id="phOutput" class="result-value">0.0</div>
       </div>
 
       <p class="hint">
-        Модель повторяет Excel: [H+] ≈ √(Ka·C), C считается через плотность, pH округляется вниз до 0.1.
+        Модель как в исходном Excel: [H⁺] ≈ √(Ka·C), C считается через плотность, pH округляется вниз до 0.1.
       </p>
     </section>
 
@@ -38,33 +69,75 @@
 
       <div class="grid">
         <label class="field">
-          <span>Масса раствора, г</span>
-          <input id="massInput" type="number" inputmode="decimal" min="0" step="0.1" placeholder="например 500" />
+          <span>Объём раствора, мл</span>
+          <input
+            id="volumeInput"
+            type="text"
+            inputmode="decimal"
+            placeholder="например 500"
+            aria-label="Объём раствора в миллилитрах"
+          />
+          <small class="hint">Используем объём, как просил автор исходного файла.</small>
         </label>
 
         <label class="field">
           <span>Исходная концентрация, %</span>
-          <input id="c0Input" type="number" inputmode="decimal" min="0" step="0.01" placeholder="например 5" />
+          <input
+            id="c0Input"
+            type="text"
+            inputmode="decimal"
+            placeholder="например 20"
+            aria-label="Исходная концентрация в процентах"
+          />
         </label>
 
         <label class="field">
           <span>Целевая концентрация, %</span>
-          <input id="ctInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="например 2" />
+          <input
+            id="ctInput"
+            type="text"
+            inputmode="decimal"
+            placeholder="например 5"
+            aria-label="Целевая концентрация в процентах"
+          />
         </label>
       </div>
 
       <div class="result">
-        <div class="result-label">Добавить воды, г</div>
+        <div class="result-left">
+          <div class="result-label">Добавить воды, г (≈ мл)</div>
+          <div id="dilutionNote" class="note"></div>
+        </div>
         <div id="waterOutput" class="result-value">0</div>
       </div>
 
       <p class="hint">
-        Формула как в Excel: вода = (c0·m/ct) − m. Если ct ≥ c0, результат ограничен снизу нулём.
+        Формула как в Excel (только вместо массы — объём): вода = (c0 · V / ct) − V.
+        Для воды считаем 1 г ≈ 1 мл.
       </p>
     </section>
 
+    <section class="card">
+      <h2>Поддержать проект</h2>
+
+      <div class="actions">
+        <a class="btn" href="https://t.me/TomSemm" target="_blank" rel="noopener">
+          Подписаться на тг канал «О том о сем»
+        </a>
+
+        <a class="btn btn-secondary" href="https://t.me/shiiko_bartender" target="_blank" rel="noopener">
+          Подписаться на тг канал «Душные мысли»
+        </a>
+      </div>
+
+      <div class="credits">
+        <p><b>Написал приложение:</b> Bic Sk</p>
+        <p><b>Автор формул, гений химии:</b> Уолтер Вайт</p>
+      </div>
+    </section>
+
     <footer class="footer">
-      <small>v1.0 — статическая страница, подходит для GitHub Pages.</small>
+      <small>v1.1 — статическая страница, подходит для GitHub Pages.</small>
     </footer>
   </main>
 
