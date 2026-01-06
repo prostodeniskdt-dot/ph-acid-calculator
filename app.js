@@ -8,91 +8,115 @@ const ACIDS = [
   { id: "acetic",   name: "Уксусная",     Ka: 1.75e-5,  molarMass: 60.05,  density: 1.005 },
 ];
 
+// Парсит числа и принимает "1.71", "1,71", " 1 234,5 "
+function parseNum(v) {
+  const s = String(v ?? "")
+    .trim()
+    .replace(/\s+/g, "")
+    .replace(",", ".");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : NaN;
+}
+
 function floorTo1Decimal(x) {
   return Math.floor(x * 10) / 10;
 }
 
-// Повторяет Excel:
-// pH = -log10( sqrt(Ka * ((%/100)*density*1000/molarMass)) )
-// затем ROUNDDOWN до 1 знака
+// pH = -log10( sqrt(Ka * C) ), C через плотность; округление вниз до 0.1
 function calcPH(percent, acid) {
-  const p = Number(percent);
-  if (!p || p <= 0) return 0;
+  const p = parseNum(percent);
+  if (!(p > 0)) return { pH: 0, note: "" };
 
   const C = (p / 100) * acid.density * 1000 / acid.molarMass; // mol/L
   const H = Math.sqrt(acid.Ka * C);
   const pH = -Math.log10(H);
 
-  return floorTo1Decimal(pH);
+  return { pH: floorTo1Decimal(pH), note: "" };
 }
 
-// Разбавление как в Excel:
-// вода = (c0*m/ct) - m
-function waterToAdd(mass, c0, ct) {
-  const m = Number(mass);
-  const ci = Number(c0);
-  const target = Number(ct);
+/**
+ * Разбавление водой.
+ * Важно: используем ОБЪЁМ исходного раствора (мл), как просил автор исходного файла.
+ * Формула та же:
+ *   water = (c0 * V / ct) - V
+ * Выводим воду в граммах, но это ≈ миллилитры (для воды 1 г/мл).
+ */
+function waterToAddByVolume(volumeMl, c0, ct) {
+  const V = parseNum(volumeMl);
+  const ci = parseNum(c0);
+  const target = parseNum(ct);
 
-  if (!(m > 0) || !(ci > 0) || !(target > 0)) return 0;
+  if (!(V > 0) || !(ci > 0) || !(target > 0)) {
+    return { water: 0, note: "" };
+  }
 
-  const water = (ci * m / target) - m;
+  // Если хотим сделать раствор концентрированнее — водой не получится.
+  if (target >= ci) {
+    return { water: 0, note: "Нельзя увеличить концентрацию, добавляя воду (целевая ≥ исходной)." };
+  }
 
-  // Практичнее, чем отрицательные значения (если target > ci)
-  return Math.max(0, water);
+  const water = (ci * V / target) - V;
+  return { water, note: "" };
 }
 
-// UI wiring
-const acidSelect = document.getElementById("acidSelect");
-const percentInput = document.getElementById("percentInput");
-const phOutput = document.getElementById("phOutput");
-
-const massInput = document.getElementById("massInput");
-const c0Input = document.getElementById("c0Input");
-const ctInput = document.getElementById("ctInput");
-const waterOutput = document.getElementById("waterOutput");
-
-function formatNumber(x, digits = 1) {
-  return Number.isFinite(x) ? x.toFixed(digits) : "0";
+function formatPH(x) {
+  return Number.isFinite(x) ? x.toFixed(1) : "0.0";
 }
 
 function formatWater(x) {
   if (!Number.isFinite(x)) return "0";
-  // выводим без лишнего шума: если целое — без десятых, иначе 1 знак
   const rounded = Math.round(x * 10) / 10;
-  return (Math.abs(rounded - Math.round(rounded)) < 1e-9)
-    ? String(Math.round(rounded))
-    : rounded.toFixed(1);
+  const isInt = Math.abs(rounded - Math.round(rounded)) < 1e-9;
+  return isInt ? String(Math.round(rounded)) : rounded.toFixed(1);
 }
+
+// UI
+const acidSelect = document.getElementById("acidSelect");
+const percentInput = document.getElementById("percentInput");
+const phOutput = document.getElementById("phOutput");
+const phNote = document.getElementById("phNote");
+
+const volumeInput = document.getElementById("volumeInput");
+const c0Input = document.getElementById("c0Input");
+const ctInput = document.getElementById("ctInput");
+const waterOutput = document.getElementById("waterOutput");
+const dilutionNote = document.getElementById("dilutionNote");
 
 function recalcPH() {
   const acid = ACIDS.find(a => a.id === acidSelect.value) || ACIDS[0];
-  const pH = calcPH(percentInput.value, acid);
-  phOutput.textContent = formatNumber(pH, 1);
+  const { pH, note } = calcPH(percentInput.value, acid);
+
+  phOutput.textContent = formatPH(pH);
+  if (phNote) phNote.textContent = note || "";
 }
 
 function recalcDilution() {
-  const water = waterToAdd(massInput.value, c0Input.value, ctInput.value);
-  waterOutput.textContent = formatWater(water);
+  const { water, note } = waterToAddByVolume(volumeInput.value, c0Input.value, ctInput.value);
+
+  // Вода по формуле может быть дробной — выводим аккуратно.
+  waterOutput.textContent = formatWater(Math.max(0, water));
+  if (dilutionNote) dilutionNote.textContent = note || "";
+}
+
+function bindRecalc(el, fn) {
+  if (!el) return;
+  el.addEventListener("input", fn);
+  el.addEventListener("change", fn);
 }
 
 function init() {
-  // populate select
   acidSelect.innerHTML = ACIDS
     .map(a => `<option value="${a.id}">${a.name}</option>`)
     .join("");
-
-  // defaults
   acidSelect.value = ACIDS[0].id;
 
-  // listeners
-  acidSelect.addEventListener("change", recalcPH);
-  percentInput.addEventListener("input", recalcPH);
+  bindRecalc(acidSelect, recalcPH);
+  bindRecalc(percentInput, recalcPH);
 
-  [massInput, c0Input, ctInput].forEach(el => {
-    el.addEventListener("input", recalcDilution);
-  });
+  bindRecalc(volumeInput, recalcDilution);
+  bindRecalc(c0Input, recalcDilution);
+  bindRecalc(ctInput, recalcDilution);
 
-  // initial calc
   recalcPH();
   recalcDilution();
 }
