@@ -5,15 +5,10 @@
   --muted: #a7aab3;
   --border: #2a2d38;
   --focus: #6aa9ff;
-  --btn: #1f6feb;
-  --btn2: #2ea043;
+  --btnbg: #1b2230;
 }
 
 * { box-sizing: border-box; }
-
-html, body {
-  height: 100%;
-}
 
 body {
   margin: 0;
@@ -23,23 +18,22 @@ body {
 }
 
 .container {
-  max-width: 860px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 18px;
-  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  padding-left: max(18px, env(safe-area-inset-left));
+  padding-right: max(18px, env(safe-area-inset-right));
 }
 
 .header h1 {
   margin: 8px 0 6px;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
-  letter-spacing: 0.2px;
 }
 
 .subtitle {
   margin: 0 0 14px;
   color: var(--muted);
-  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -52,33 +46,37 @@ body {
 }
 
 .card h2 {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-size: 18px;
 }
 
-.details summary {
-  cursor: pointer;
-  user-select: none;
-  font-weight: 700;
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
-.details-body {
-  margin-top: 10px;
-  color: var(--text);
-  line-height: 1.5;
-  font-size: 14px;
-}
-
-.muted-list {
-  margin: 10px 0 0;
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: var(--muted);
   font-size: 13px;
+  user-select: none;
+}
+
+.toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--focus);
 }
 
 .field {
   display: grid;
   gap: 6px;
-  margin: 10px 0;
+  margin: 12px 0;
 }
 
 .field span {
@@ -86,27 +84,26 @@ body {
   font-size: 13px;
 }
 
+.microhint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 input, select {
   width: 100%;
-  padding: 12px 12px; /* крупнее для мобильных */
+  padding: 12px 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: #0f1117;
   color: var(--text);
   outline: none;
-  font-size: 16px; /* важно: меньше 16px на iOS вызывает zoom */
+  font-size: 16px; /* важно для iOS: меньше 16px = автозум */
 }
 
 input:focus, select:focus {
   border-color: var(--focus);
-  box-shadow: 0 0 0 3px rgba(106, 169, 255, 0.22);
-}
-
-.hint {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.35;
+  box-shadow: 0 0 0 3px rgba(106, 169, 255, 0.2);
 }
 
 .grid {
@@ -125,14 +122,9 @@ input:focus, select:focus {
   border-radius: 12px;
   border: 1px dashed var(--border);
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-}
-
-.result-left {
-  display: grid;
-  gap: 4px;
 }
 
 .result-label {
@@ -140,59 +132,87 @@ input:focus, select:focus {
   font-size: 13px;
 }
 
-.note {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.35;
-  max-width: 520px;
-}
-
 .result-value {
   font-size: 30px;
   font-weight: 900;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
 
-.actions {
+.hint {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.list {
+  margin: 8px 0 0 18px;
+  padding: 0;
+  color: var(--text);
+}
+
+.list li {
+  margin: 6px 0;
+  line-height: 1.45;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.details {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.details summary {
+  cursor: pointer;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.credits {
   display: grid;
-  gap: 10px;
-  margin-top: 8px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 @media (min-width: 720px) {
-  .actions { grid-template-columns: 1fr 1fr; }
+  .credits { grid-template-columns: 1fr 1fr; }
+}
+
+.credit-block {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.credit-title {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 10px;
 }
 
 .btn {
   display: inline-flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
-  text-align: center;
+  gap: 8px;
   padding: 12px 14px;
   border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--btnbg);
+  color: var(--text);
   text-decoration: none;
-  color: white;
-  background: var(--btn);
-  border: 1px solid rgba(255,255,255,0.12);
-  font-weight: 800;
-  line-height: 1.2;
-  min-height: 46px; /* комфортная высота для тапа */
+  font-weight: 700;
 }
 
-.btn:hover {
-  filter: brightness(1.05);
-}
-
-.btn-secondary {
-  background: var(--btn2);
-}
-
-.credits {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 13px;
+.btn:focus {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px rgba(106, 169, 255, 0.2);
 }
 
 .footer {
